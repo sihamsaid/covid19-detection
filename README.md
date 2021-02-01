@@ -41,11 +41,11 @@ Voir [ici](https://github.com/sihamsaid/covid19-detection/blob/main/modeling/cov
 
 Nous avons mis en place une application web, en utilisant [Streamlit]( https://www.streamlit.io/). Cette application permettra de choisir un modèle à utiliser, de télécharger une radiologie et d'avoir le résultat de la classification. Voir [ici](https://github.com/sihamsaid/covid19-detection/blob/main/streamlit/covid19-streamlit.py) pour plus de détails sur l'implémentation.
 
-L'uilisation de cette application, requiert l'exécution des notebook (voir ci dessous), et de sauvegarder les modèles générés sous le dossier `models` du dossier streamlit :
+L'uilisation de cette application, requiert l'exécution des notebook (voir ci dessous), et de sauvegarder les modèles générés, sous le dossier [models](https://github.com/sihamsaid/covid19-detection/tree/main/streamlit/models) du dossier streamlit :
 
 -  [Option 1](https://github.com/sihamsaid/covid19-detection/blob/main/modeling/covid19_V1.ipynb)  
 
 - [Option 2](https://github.com/sihamsaid/covid19-detection/blob/main/modeling/covid19_V2.ipynb)
 
 
-La commande qui lance notre application streamlit est : `streamlit run covid19-streamlit.py` à exécuter sous le 
+La commande qui lance notre application streamlit est : `streamlit run covid19-streamlit.py`
