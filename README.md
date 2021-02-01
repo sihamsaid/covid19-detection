@@ -1,7 +1,3 @@
-# covid19-detection
-Ce projet rentre dans le cadre de la detection du covid19 en se basant sur les radiologies des patients.
-
- 
 # Description 
 Le but est la mise en place d'un modèle de classification, permettant de catégoriser les radiographies pulmonaires en trois classes : 
 - Normal 
@@ -10,9 +6,12 @@ Le but est la mise en place d'un modèle de classification, permettant de catég
 
 Nous avons opté pour la mise en place d'un classificateur par le biais de modèles de Deep Learning pour la classification d'images.
 
+Merci de noter que le dataset est disponible sur [Kaggle](https://www.kaggle.com/tawsifurrahman/covid19-radiography-database). Nous en remercions les autheurs.
+
+Nous remercions les équipes [Datascientest](https://datascientest.com/).
 
 # Modélisation et Architecture des modèles
-Nous avons mis en place différentes architectures basées sur les réseaux convolutifs (CNN), de transfert learning ainsi que les modèles hybrides (feauture extraction + modèles de machine learning standard). Nous les avons évalués avec les différentes métriques.
+Nous avons mis en place différentes architectures basées sur les réseaux convolutifs (CNN), le transfert learning ainsi que les modèles hybrides ( combinat l'extraction de features avec les modèles de machine learning standard). Nous les avons évalués avec les différentes métriques.
 
 ## Les modèles entraînés 
 
@@ -23,10 +22,30 @@ Nous avons mis en place différentes architectures basées sur les réseaux conv
 
 ## Préprocessing des données
 
-L'application d'un traitement d'image peut atténuer le biais induit par la présence de bords noirs verticaux. L'idée sous-jacente, est de réaliser un «zoom» sur l'ensemble des radiographies. La solution retenue préconise l'élimination des bords latéraux, inférieurs et supérieurs, afin de se focaliser sur l'information utile, les poumons. 
-Lors du traitement des données où on appliqué une transformation de 10% pour supprimer les bordures des images, de ce fait on a procédé ça a été fait sur l'ensemble des données brutes, c'est sur ces nouvelles données transformées qu'on a entraîné nos différents modèles et qui ont donné de très bons résultats sur le test et sur la validation.
+Lors de l'étape de la [data visualisation](https://github.com/sihamsaid/covid19-detection/blob/main/dataviz/datavisualisation.ipynb/), nous avons observé que l'application d'un traitement d'image peut atténuer le biais induit par la présence de bords noirs verticaux. L'idée sous-jacente, est de réaliser un «zoom» sur l'ensemble des radiographies. La solution retenue préconise l'élimination des bords latéraux, inférieurs et supérieurs, afin de se focaliser sur l'information utile, les poumons. 
 
-Néanmoins, nous avons mis en place pendant ce week end, ce qu'on a appelé une option 2 qui consiste en l'application de la transformation que sur le data set du train, sans y toucher au dataset du test. Nous décidons de faire l'apprentissage des modèles sur un dataset englobant les images originales(le X_train original) et les images transformées.(transformation effectuée sur X_train). L'idée ici est de voir le comportement de notre algo sur de types d' images, sans et avec bordures.
+Lors du traitement des données nous avons appliqué une transformation de 10% pour supprimer les bordures des images, de ce fait, nous avons procédé de deux manères différentes option 1 et option 2. 
+
+### Option 1
+
+Ici nous avons entraîné nos différents modèles sur ces nouvelles données transformées, cela a donné de très bons résultats sur le test et sur la validation. Voir [ici](https://github.com/sihamsaid/covid19-detection/blob/main/modeling/covid19_V1.ipynb) pour plus de détails sur l'implémentation.
+
+### Option 2
+
+L'idée ici est de voir le comportement de nos modèles sur de différents types d'images, sans et avec bordures. Donc, nous décisons de d'aplliquer la transformation de 10% que sur  sur le data set du train, sans y toucher au dataset du test. L'apprentissage des modèles se fera, donc, sur un dataset englobant les images originales(le X_train original) et les images transformées. Cette option a également montré de très bons résultats. 
+Voir [ici](https://github.com/sihamsaid/covid19-detection/blob/main/modeling/covid19_V2.ipynb) pour plus de détails sur l'implémentation.
 
 
-On avons fait tourner l'integralité de nos modèles sur les deux options, et dans les deux cas ça donne de bons résultats
+
+## Streamlit
+
+Nous avons mis en place une application web, en utilisant [Streamlit]( https://www.streamlit.io/). Cette application permettra de choisir un modèle à utiliser, de télécharger une radiologie et d'avoir le résultat de la classification. Voir [ici](https://github.com/sihamsaid/covid19-detection/blob/main/streamlit/covid19-streamlit.py) pour plus de détails sur l'implémentation.
+
+L'uilisation de cette application, requiert l'exécution des notebook (voir ci dessous), et de sauvegarder les modèles générés sous le dossier `models` du dossier streamlit :
+
+-  [Option 1](https://github.com/sihamsaid/covid19-detection/blob/main/modeling/covid19_V1.ipynb)  
+
+- [Option 2](https://github.com/sihamsaid/covid19-detection/blob/main/modeling/covid19_V2.ipynb)
+
+
+La commande qui lance notre application streamlit est : `streamlit run covid19-streamlit.py` à exécuter sous le 
