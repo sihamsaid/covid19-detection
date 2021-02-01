@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -19,9 +20,16 @@ from tensorflow.keras.optimizers.schedules import ExponentialDecay
 from tensorflow.keras.losses import SparseCategoricalCrossentropy
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.models import load_model
+# On utilise joblib pour charger les modèles hybrides inception
+from joblib import load
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.applications.inception_v3 import preprocess_input
+
 
 # Encoding des trois classes
 ENCODING = {'COVID-19': 0, 'NORMAL': 1, 'Viral Pneumonia': 2}
+IMAGES_TYPES = list(ENCODING.keys())
 
 st.title("Prédire la classe d'une radiologie")
 
@@ -35,19 +43,23 @@ def im_resize_256(img):
         img_ret = cv2.resize(img, dsize = (256,256))
     return img_ret
 
-
-uploaded_file = st.file_uploader("Télécharger votre radiologie", type=['png','jpeg', 'jpg'])
-if uploaded_file is not None:
-     image = plt.imread(uploaded_file)
-     image = im_resize_256(image)
-     image = image.reshape(256, 256, 1)
-     st.image(image)
+def predict_inception(array):
+    # Charger le modèle inception avce keras
+    model = tf.keras.models.load_model("./models/InceptionV3")
+    intermediate_layer_model = Model(model.input, model.layers[2].output)
+    X_feature = intermediate_layer_model.predict(preprocess_input(array))
 
 
+    # Charger le modèle XGBoost avec joblib
+    xgboost = load("./models/InceptionV3/xgb.joblib")
+
+    return xgboost.predict(X_feature)
+    
+    
 df = pd.DataFrame({
-  'Nom du Modèle': ["CNN Architecture 1", "CNN Architecture 2"],
-  'Description': ["Architecture CNN Personnalisée", "Architecture CNN Personnalisée"],
-  'Chemin':['cnn_architecture_1', 'cnn_architecture_2']
+  'Nom du Modèle': ["LeNet", "Perso 1", "EfficientNetB5", "InceptionV3"],
+  'Description': ["CNN LeNet", "CNN Personnalisé 1", "Transfert Learning EfficientNetB5", "Extraction Features InceptionV3"],
+  'Chemin':['LeNet', 'Perso 1', 'EfficientNetB5', 'InceptionV3']
  })
 
 
@@ -67,12 +79,12 @@ chemin = f".\models\{df_model['Chemin'].values[0]}"
 model_summary = open(f"{chemin}\summary.txt").read()
 st.text(model_summary)
 
-# Afficher la loss
-loss_image = plt.imread(f"{chemin}\loss.png")
+# Afficher la loss accuracy
+loss_image = plt.imread(f"{chemin}\loss_accuracy.png")
 st.image(loss_image) 
 
 # Afficher la matrice de confusion
-confusion_image = plt.imread(f"{chemin}\matrice_confusion.png")
+confusion_image = plt.imread(f"{chemin}\confusion_matrix.png")
 st.image(confusion_image) 
 
 # Afficher le rapport de classification
@@ -81,29 +93,45 @@ st.text(classification_report)
 
 
 # Load le modèle Keras stocké
-if st.button('Lancer la Prédiction'):
-    model = tf.keras.models.load_model(f"{chemin}")
-    #model.summary()
-    if image is not None:
-        # Mettre l'image dans un numpy array
-        array = np.asarray([image])
-        # Nous devons aussi normaliser 
-        array = array / 255
+
+uploaded_file = st.file_uploader("Télécharger votre radiologie", type=['png','jpeg', 'jpg'])
+if uploaded_file is not None:
+    image = plt.imread(uploaded_file)
+    image = im_resize_256(image)
+    image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    st.image(image)
+
+    # Mettre l'image dans un numpy array.
+    array=np.array(([image]))
+
+    if "InceptionV3" in chemin:
+        classes = predict_inception(array)
+        #st.write(classes[0])
+        image_class = classes[0]
+        if image_class == 0:
+            st.error('Radiologie de COVID')
+        elif image_class == 1:
+            st.write('Radiologie Normale')
+        else:
+            st.warning('Radiologie de Pneumo')
+    else:
+        model = tf.keras.models.load_model(f"{chemin}")
         classes = model.predict(array)
-        # pour rappel on a l'enconding suivant : {'COVID-19': 0, 'NORMAL': 1, 'Viral Pneumonia': 2}
-        #classes
+  
         # Récupérer l'index de la classe
         index = np.argmax(classes[0], axis=0)
         # calculer le pourcentage
         valeur = classes[0][index]
         valeur = round(valeur*100, 2)
+        #st.write(array)
+        df_prediction = pd.DataFrame(data=classes[0], index = IMAGES_TYPES)
+        df_prediction = df_prediction.rename({'0': 'Prédiction'})
+        st.write(df_prediction)
         if index == 0:
             st.error(f'Radiologie de COVID à {valeur}%')
         elif index == 1:
             st.write(f'Radiologie Normale à {valeur}%')
         else:
             st.warning(f'Radiologie de Pneumo à {valeur}%')
-    else:
-        st.warning("Aucune image sélectionée")
    
 
