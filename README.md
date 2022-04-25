@@ -8,7 +8,6 @@ Nous avons opté pour la mise en place d'un classificateur par le biais de modè
 
 Merci de noter que le dataset est disponible sur [Kaggle](https://www.kaggle.com/tawsifurrahman/covid19-radiography-database). Nous en remercions les auteurs.
 
-Nous remercions les équipes [Datascientest](https://datascientest.com/).
 
 # Modélisation et Architecture des modèles
 Nous avons mis en place différentes architectures basées sur les réseaux de neurones convolutifs (CNN), le transfert learning ainsi que les modèles hybrides (combinant l'extraction de features avec les modèles de machine learning standard). Nous les avons évalués avec les différentes métriques.
